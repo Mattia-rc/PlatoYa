@@ -21,7 +21,7 @@ En establecimientos gastronómicos de mediana concurrencia, especialmente durant
 - Falta de información sobre el estado de los pedidos.
 - Dificultades para obtener reportes de ventas.
 
-## 💡 Solución propuesta
+## 💡 Solución propuesta (MVP)
 
 PlatoYa centraliza la gestión de mesas, pedidos y cobros mediante una aplicación web.
 
@@ -104,16 +104,15 @@ En esta primera versión no se incluirán:
 | Frontend | Angular |
 | Backend | Java |
 | Base de datos | PostgreSQL |
-| ORM | Prisma |
+| ORM | Hibernate |
 | Autenticación | JWT |
-| Comunicación en tiempo real | Socket.IO |
-| Contenedores | Docker y Docker Compose |
+| Contenedores | Docker |
 | Frontend en la nube | Vercel |
-| Backend en la nube | Render |
-| Base de datos en la nube | PostgreSQL |
-| Control de versiones | Git y GitHub |
+| Backend en la nube | Render / Railway (pendiente definición) |
+| Base de datos en la nube | Neon / Supabase (pendiente definición) |
 
 ## 📁 Estructura prevista
+Estrategia de organización del proyecto: monorepo.
 
 ```text
 PlatoYa/
