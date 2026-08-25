@@ -101,8 +101,8 @@ En esta primera versión no se incluirán:
 
 | Capa | Tecnología |
 |---|---|
-| Frontend | React + TypeScript |
-| Backend | Node.js + Express + TypeScript |
+| Frontend | Angular |
+| Backend | Java |
 | Base de datos | PostgreSQL |
 | ORM | Prisma |
 | Autenticación | JWT |
