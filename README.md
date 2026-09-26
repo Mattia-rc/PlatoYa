@@ -2,12 +2,37 @@
 
 > **Sistema Web de Gestión de Mesas y Comandas Digitales para Bares con Cocina**  
 > **Carrera:** Tecnicatura Universitaria en Programación a Distancia — UTN  
-> **Entrega:** 1.ª — Propuesta de Proyecto y Repositorio (con revision inicial) 
+> **Entrega:** 2.ª — Diseño y módulos
 > **Grupo:** 162  
 > **Integrantes:** Bagni, Mattia | Petrei, Maximiliano  
 > **Tutor asignado:** Londero, Oscar
 
 ---
+
+## Documentación de la segunda entrega
+
+Esta instancia presenta el análisis y diseño de PlatoYa.
+No incluye implementación de frontend, backend ni lógica de negocio.
+
+| Documento | Contenido |
+|---|---|
+| [Modelo de datos](docs/modelo-datos.md) | Diagrama entidad-relación, tablas, campos, tipos, claves, relaciones e índices. |
+| [Esquema SQL](database/esquema.sql) | Definición de la estructura de PostgreSQL mediante DDL. |
+| [Módulos funcionales](docs/modulos.md) | Descripción, prioridades y alcance de los módulos. |
+| [Arquitectura](docs/arquitectura.md) | Componentes, tecnologías y organización por capas. |
+| [Frontend](frontend/README.md) | Organización prevista de la aplicación web. |
+| [Backend](backend/README.md) | Organización prevista de la API. |
+| [Base de datos](database/README.md) | Alcance del esquema y evolución prevista. |
+
+**Estado:** documentación preparada para revisión; pendiente de aprobación
+del tutor y del comité.
+
+El relevamiento con un establecimiento o usuario real continúa pendiente.
+El caso de El Galeón se conserva como escenario hipotético y no como
+evidencia obtenida de una entrevista.
+
+---
+
 
 ## 📋 1. Identificación y Análisis de la Problemática
 
@@ -15,7 +40,7 @@
 PlatoYa se enfoca en un único tipo de establecimiento: **bar con cocina y servicio de mesa con mozo**.
 Se eligió este contexto porque presenta dos sectores de preparación bien diferenciados (**barra** y **cocina**) y un circuito completo de atención: mesa, comandas, preparación, entrega, cuenta y cobro.
 
-Otros formatos (restaurantes con pasos, locales de pedido en mostrador, delivery) quedan fuera del modelo inicial y se analizan en la sección [11. Generalizaciones posibles](#-11-generalizaciones-posibles).
+Otros formatos (restaurantes con pasos, locales de pedido en mostrador, delivery) quedan fuera del modelo inicial y se analizan en la sección [9. Generalizaciones posibles](#-9-generalizaciones-posibles).
 
 ### 1.2 Escenario de referencia: "El Galeón" (caso hipotético)
 
@@ -91,7 +116,7 @@ PlatoYa, además de resolver el problema, **genera los datos que hoy no existen*
 ### 3.1 Circuito principal
 
 ```mermaid
-flowchart LR
+flowchart TD
     A[Mesa LIBRE] -->|Mozo abre mesa| B[Cuenta ABIERTA]
     B -->|Mozo carga ítems y envía| C[Comanda N]
     C -->|Ítems con destino barra| D[Pantalla Barra]
@@ -99,7 +124,7 @@ flowchart LR
     D -->|Listo| F[Mozo entrega]
     E -->|Listo| F
     F -->|La mesa pide más| C
-    F -->|La mesa pide la cuenta| G[Cuenta PEDIDA]
+    F -->|La mesa pide la cuenta| G[Cuenta CUENTA_PEDIDA]
     G -->|Admin registra pago| H[Cuenta PAGADA]
     H -->|Los clientes se retiran| I[Mozo/Admin libera mesa]
     I --> A
@@ -137,17 +162,26 @@ stateDiagram-v2
     ENTREGADO --> ANULADO: Solo Admin, con motivo (merma)
 ```
 
-**Estado calculado de la comanda**:
-- **Pendiente:** todos sus ítems NO anulados están `PENDIENTE`.
-- **En curso:** al menos un ítem está en preparación o listo, y todavía hay ítems sin entregar.
-- **Completa:** todos sus ítems no anulados están `ENTREGADO`.
+**Estado calculado de la comanda:**
+
+Se evalúa en el siguiente orden:
+
+1. **Anulada:** todos sus ítems están `ANULADO`.
+2. **Completa:** todos sus ítems no anulados están `ENTREGADO`.
+3. **Pendiente:** todos sus ítems no anulados están `PENDIENTE`.
+4. **En curso:** cualquier combinación restante.
+
+Esta definición contempla, por ejemplo, una comanda con algunos ítems
+entregados y otros todavía pendientes.
 
 ---
 
 ## 📐 4. Reglas de Negocio
 
 **Mesas y cuentas**
-- **RN-01:** Una mesa tiene como máximo **una cuenta no pagada** a la vez.
+- **RN-01:** Una mesa tiene como máximo una cuenta activa a la vez.
+  Se consideran activas las cuentas en estado `ABIERTA` o `CUENTA_PEDIDA`.
+  Las cuentas `PAGADA` o `ANULADA` se conservan como historial.
 - **RN-02:** Al abrir una cuenta, la mesa pasa a `OCUPADA`.
 - **RN-03:** **Registrar el pago no libera la mesa.**
     - La cuenta pasa a `PAGADA` y queda cerrada definitivamente, pero la mesa sigue `OCUPADA` hasta que un mozo o el Admin la libera manualmente.
@@ -169,7 +203,7 @@ stateDiagram-v2
 - **RN-16:** El sector cambia el estado a `EN_PREPARACION` y `LISTO`. El mozo lo cambia a `ENTREGADO`.
 
 **Anulaciones**
-- **RN-17:** Un ítem anulado **nunca se borra**: queda `ANULADO`, con fecha, usuario y motivo, y **no se cobra**.
+- **RN-17:** Un ítem anulado nunca se borra: queda `ANULADO`, con fecha y usuario responsable, y no se cobra. El motivo es opcional si estaba `PENDIENTE` y obligatorio si la   preparación ya había comenzado.
 - **RN-18:** Un ítem `PENDIENTE` lo puede anular el mozo sin autorización.
 - **RN-19:** Un ítem `EN_PREPARACION` lo puede anular el mozo con **motivo obligatorio**. Queda marcado como **merma**.
 - **RN-20:** Un ítem `LISTO` o `ENTREGADO` solo lo puede anular el **Admin**, con motivo obligatorio. Queda marcado como merma.
@@ -185,6 +219,19 @@ stateDiagram-v2
 - **RN-26:** Se registra **un único pago por cuenta**, por el total, con medio de pago y fecha. Al registrarlo, la cuenta pasa a `PAGADA`.
 - **RN-27:** Quedan fuera del MVP: dividir la cuenta, pagos parciales, propinas, descuentos, factura fiscal y arqueo de caja.
 
+### Precisiones del diseño para revisión
+
+- Una cuenta pagada no admite nuevos consumos ni anulaciones que
+  modifiquen su importe.
+- Se propone que cada línea de comanda comparta un único estado para
+  todas sus unidades, sin entregas ni anulaciones parciales de la línea.
+- Se propone permitir la anulación de una cuenta únicamente si no tiene
+  consumos cobrables ni pagos registrados.
+- Se propone cerrar las cuentas de total cero mediante anulación
+  justificada, sin generar un pago ficticio.
+
+Estas precisiones están pendientes de validación con el tutor.
+Las políticas operativas también deberán contrastarse con un usuario real.
 ---
 
 ## 🧪 5. Caso de Análisis
@@ -242,8 +289,8 @@ stateDiagram-v2
 | **Backend**                    | Java + Spring Boot                          | Maneja bien la lógica de estados y validaciones de reglas de negocio, con una API REST tipada.             |
 | **Base de datos**              | PostgreSQL + Flyway                         | Integridad transaccional entre cuentas, comandas, ítems y pagos. Flyway versiona el esquema.               |
 | **Autenticación**              | Spring Security + JWT                       | Control de acceso por rol (`ADMIN`, `MOZO`, `COCINA`, `BARRA`).                                            |
-| **Actualización de pantallas** | Polling (cada 5-10 s)                       | Simple y suficiente para el MVP. WebSocket queda como deseable.                                            |
-| **Despliegue**                 | Docker + PaaS (Render / Railway, a definir) | Mismo entorno en desarrollo y producción, sin costo de infraestructura.                                    |
+| **Actualización de pantallas** | Polling (cada 5 s inicialmente) | Consulta periódica de estados. El intervalo se ajustará durante las pruebas. WebSocket queda como deseable. |
+| **Despliegue** | Docker + PaaS (proveedor a definir) | Entorno reproducible. Proveedor pendiente de selección según compatibilidad, límites y costos. |
 
 ### 6.2 Nivel de conocimiento del stack
 
@@ -260,7 +307,7 @@ Escala: *Nulo · Básico (cursada) · Intermedio (proyecto propio) · Avanzado (
 | Docker          |      Avanzado       |   Avanzado    |
 | Deployment      |      Avanzado       |   Avanzado    |
 
-**Conclusión:** el equipo conoce bien todo el stack elegido, sin tecnologías nuevas que aprender. Esto permite dedicar el tiempo a modelar bien el proceso en lugar de aprender herramientas. Ambos integrantes trabajarán en todas las capas.
+**Conclusión:** el equipo cuenta con conocimientos del stack seleccionado, con distintos niveles de experiencia. Maximiliano tiene mayor experiencia en Java, Spring Boot y Spring Security; Mattia deberá profundizar esas tecnologías con acompañamiento del equipo. Ambos participarán en las distintas capas, distribuyendo tareas según experiencia y disponibilidad.
 
 ---
 
@@ -291,6 +338,11 @@ Escala: *Nulo · Básico (cursada) · Intermedio (proyecto propio) · Avanzado (
 
 ## 🧱 8. Prueba vertical sencilla
 
+> **Etapa posterior:** este apartado describe una prueba planificada.
+> No forma parte de la implementación de esta entrega.
+> Se comenzará después de la aprobación de la etapa de análisis y diseño,
+> conforme a la consigna de la segunda entrega.
+
 El primer objetivo técnico es un recorrido de punta a punta, mínimo pero funcionando:
 
 > **abrir mesa → cargar producto → enviar comanda → cocina la recibe → cambia estado → mozo visualiza el cambio**
@@ -300,7 +352,7 @@ El primer objetivo técnico es un recorrido de punta a punta, mínimo pero funci
 2. El mozo carga un producto de cocina (con cantidad y observación) y envía la comanda.
 3. Un usuario `COCINA` ve la comanda en su pantalla, con la mesa, la hora de envío y la observación.
 4. Cocina cambia el ítem a `EN_PREPARACION` y luego a `LISTO`.
-5. Sin recargar manualmente, la pantalla del mozo muestra el ítem en `LISTO` en menos de 10 segundos (polling).
+5. Sin recargar manualmente, la pantalla del mozo consulta los estados cada 5 segundos mediante polling. Se verificará el tiempo efectivo de actualización durante las pruebas.
 6. Todo corre con `docker-compose up`, con datos de prueba cargados por Flyway (mesas, productos y usuarios).
 
 ---
@@ -316,17 +368,26 @@ Surgieron al analizar la revisión de la propuesta. **No forman parte del MVP**,
 
 ---
 
-## 📁 10. Estructura inicial posible del proyecto
-
-Organización en monorepo para simplificar la evaluación académica y el control de versiones:
+## 📁 10. Estructura del repositorio — Segunda entrega
 
 ```text
 PlatoYa/
-├── frontend/          # Aplicación Web en Angular
-├── backend/           # API REST en Java + Spring Boot
-├── database/          # Migraciones Flyway y scripts de BD
-├── docs/              # Informes y documentación académica
-├── README.md          # Documento de presentación de la propuesta
-├── .gitignore
-└── docker-compose.yml # Orquestación local para desarrollo
+├── README.md
+├── frontend/
+│   └── README.md
+├── backend/
+│   └── README.md
+├── database/
+│   ├── README.md
+│   └── esquema.sql
+└── docs/
+    ├── modelo-datos.md
+    ├── modulos.md
+    └── arquitectura.md
 ```
+
+En esta entrega, frontend y backend contienen únicamente documentación
+de su organización prevista.
+
+El esquema SQL es un entregable de diseño. La aplicación y la
+configuración de ejecución se incorporarán después de la aprobación.
