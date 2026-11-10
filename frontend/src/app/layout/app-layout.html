@@ -1,0 +1,18 @@
+<div class="app-shell">
+  <header class="topbar">
+    <a class="brand" [routerLink]="auth.homeForRole()">
+      <span class="brand-mark"><i class="pi pi-receipt"></i></span>
+      <span><strong>PlatoYa</strong><small>Gestión de comandas</small></span>
+    </a>
+    <nav aria-label="Navegación principal">
+      @if (role() === 'MOZO' || role() === 'ADMIN') { <a routerLink="/mozo" routerLinkActive="active">Mesas</a> }
+      @if (role() === 'COCINA' || role() === 'ADMIN') { <a routerLink="/cocina" routerLinkActive="active">Cocina</a> }
+      @if (role() === 'BARRA' || role() === 'ADMIN') { <a routerLink="/barra" routerLinkActive="active">Barra</a> }
+    </nav>
+    <div class="session">
+      <span><strong>{{ auth.currentUser()?.nombre }}</strong><small>{{ role() }}</small></span>
+      <p-button icon="pi pi-sign-out" [text]="true" severity="secondary" ariaLabel="Cerrar sesión" (onClick)="logout()" />
+    </div>
+  </header>
+  <main><router-outlet /></main>
+</div>

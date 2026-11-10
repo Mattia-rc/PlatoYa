@@ -1,0 +1,12 @@
+.app-shell { min-height: 100vh; background: var(--surface-ground); }
+.topbar { height: 76px; padding: 0 clamp(1rem, 4vw, 3rem); background: var(--surface-card); border-bottom: 1px solid var(--surface-border); display: flex; align-items: center; gap: 2rem; position: sticky; top: 0; z-index: 10; }
+.brand { display: flex; align-items: center; gap: .75rem; color: var(--text-color); text-decoration: none; margin-right: auto; }
+.brand-mark { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px; color: white; background: var(--p-primary-color); font-size: 1.2rem; }
+.brand span:last-child, .session span { display: flex; flex-direction: column; }
+small { color: var(--text-color-secondary); font-size: .73rem; }
+nav { display: flex; gap: .4rem; }
+nav a { padding: .65rem .9rem; border-radius: 8px; color: var(--text-color-secondary); text-decoration: none; font-weight: 600; }
+nav a.active { color: var(--p-primary-color); background: var(--p-primary-50); }
+.session { display: flex; align-items: center; gap: .5rem; text-align: right; }
+main { padding: clamp(1rem, 4vw, 3rem); max-width: 1500px; margin: 0 auto; }
+@media (max-width: 720px) { .topbar { gap: .5rem; } .brand small, .session span { display: none; } nav a { padding: .55rem; } }
