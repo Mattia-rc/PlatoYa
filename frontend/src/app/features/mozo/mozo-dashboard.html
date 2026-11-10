@@ -1,0 +1,31 @@
+<section class="page-header">
+  <div><p class="eyebrow">SALÓN</p><h1>Estado de mesas</h1><p>Seleccioná una mesa para comenzar o continuar la atención.</p></div>
+  <div class="legend"><span><i class="free"></i>Libre</span><span><i class="busy"></i>Ocupada</span></div>
+</section>
+@if (kpis(); as resumen) {
+  <section class="kpi-grid" aria-label="Resumen de mesas">
+    <article class="kpi"><span class="kpi-icon blue"><i class="pi pi-th-large"></i></span><div><small>Total de mesas</small><strong>{{ resumen.totalMesas }}</strong><span>Capacidad del salón</span></div></article>
+    <article class="kpi"><span class="kpi-icon green"><i class="pi pi-check-circle"></i></span><div><small>Mesas libres</small><strong>{{ resumen.mesasLibres }}</strong><span>Disponibles ahora</span></div></article>
+    <article class="kpi"><span class="kpi-icon orange"><i class="pi pi-users"></i></span><div><small>Mesas ocupadas</small><strong>{{ resumen.mesasOcupadas }}</strong><span>{{ resumen.ocupacionPorcentaje }}% de ocupación</span></div></article>
+    <article class="kpi"><span class="kpi-icon violet"><i class="pi pi-receipt"></i></span><div><small>Cuentas activas</small><strong>{{ resumen.cuentasAbiertas }}</strong><span>{{ resumen.cuentasPedidas }} esperando cobro</span></div></article>
+  </section>
+}
+@if (error()) { <div class="error-banner"><i class="pi pi-exclamation-circle"></i>{{ error() }}</div> }
+@if (cargando()) { <div class="center"><p-progress-spinner ariaLabel="Cargando mesas" /></div> }
+@else if (!mesas().length) { <div class="empty"><i class="pi pi-inbox"></i><h2>No hay mesas configuradas</h2><p>Cuando el backend devuelva mesas aparecerán acá.</p></div> }
+@else {
+  <div class="tables-grid">
+    @for (mesa of mesas(); track mesa.id) {
+      <article class="table-card" [class.occupied]="mesa.estado === 'OCUPADA'">
+        <div class="table-top"><span class="table-number">{{ mesa.numero }}</span><p-tag [value]="mesa.estado === 'LIBRE' ? 'Libre' : 'Ocupada'" [severity]="mesa.estado === 'LIBRE' ? 'success' : 'warn'" /></div>
+        <div><h2>Mesa {{ mesa.numero }}</h2><p><i class="pi pi-users"></i> Hasta {{ mesa.capacidad }} personas</p></div>
+        @if (mesa.estado === 'LIBRE') {
+          <p-button label="Abrir mesa" icon="pi pi-plus" [loading]="mesaProcesando() === mesa.id" (onClick)="abrirMesa(mesa)" />
+        } @else {
+          <div class="account"><span>Cuenta activa</span><strong>#{{ mesa.cuentaId ?? '—' }}</strong></div>
+          <p-button label="Ver comanda" icon="pi pi-arrow-right" iconPos="right" severity="secondary" [outlined]="true" />
+        }
+      </article>
+    }
+  </div>
+}

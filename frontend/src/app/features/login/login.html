@@ -1,0 +1,33 @@
+<main class="login-page">
+  <section class="intro">
+    <div class="logo"><i class="pi pi-receipt"></i></div>
+    <p class="eyebrow">OPERACIÓN SIMPLE, SERVICIO ÁGIL</p>
+    <h1>Cada pedido,<br><span>en el lugar correcto.</span></h1>
+    <p>Mesas, cocina y barra conectadas en un mismo circuito.</p>
+    <div class="flow"><span>Mesa</span><i class="pi pi-arrow-right"></i><span>Comanda</span><i
+        class="pi pi-arrow-right"></i><span>Preparación</span></div>
+  </section>
+  <section class="login-panel">
+    <form (ngSubmit)="ingresar()">
+      <div class="mobile-brand"><i class="pi pi-receipt"></i> PlatoYa</div>
+      <p class="eyebrow">BIENVENIDO</p>
+      <h2>Iniciar sesión</h2>
+      <p>Ingresá con tu usuario del establecimiento.</p>
+      @if (error()) { <p-message severity="error" [text]="error()" styleClass="full-message" /> }
+      <label for="usuario">Usuario</label>
+      <input pInputText id="usuario" name="usuario" [(ngModel)]="usuario" autocomplete="username"
+        placeholder="Ej. mozo1" />
+      <label for="contrasena">Contraseña</label>
+      <p-password inputId="contrasena" name="contrasena" [(ngModel)]="contrasena" [feedback]="false" [toggleMask]="true"
+        autocomplete="current-password" placeholder="Tu contraseña" />
+      <p-button type="button" label="Ingresar" icon="pi pi-arrow-right" iconPos="right" [loading]="cargando()"
+        styleClass="submit-button" (onClick)="ingresar()" />
+      <div class="demo-users">
+        <strong>Modo demostración</strong>
+        <span>Usuarios: <code>admin</code>, <code>mozo</code>, <code>cocina</code> o <code>barra</code></span>
+        <span>Contraseña para todos: <code>1234</code></span>
+      </div>
+      <small>PlatoYa · Grupo 162</small>
+    </form>
+  </section>
+</main>
