@@ -45,6 +45,30 @@ export interface KpiPreparacion {
   tiempoPromedioMinutos: number;
 }
 
+export interface ProductoResumen {
+  id: number;
+  nombre: string;
+  precio: number;
+  destino: Destino;
+}
+
+export interface CrearItemComandaRequest {
+  productoId: number;
+  cantidad: number;
+  observacion?: string;
+}
+
+export interface CrearComandaRequest {
+  items: CrearItemComandaRequest[];
+}
+
+export interface ComandaCreada {
+  id: number;
+  numero: number;
+  fechaEnvio: string;
+  items: ItemPreparacion[];
+}
+
 export interface AbrirMesaRequest { mesaId: number; }
 export interface CambiarEstadoItemRequest { estado: EstadoItem; }
 export interface UsuarioResumen { id: number; nombre: string; usuario: string; rol: UserRole; activo: boolean; }

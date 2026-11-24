@@ -4,13 +4,14 @@ import { Observable } from 'rxjs';
 import { delay, of, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { LoginRequest, LoginResponse } from '../auth/auth.models';
-import { AbrirMesaRequest, CambiarEstadoItemRequest, Destino, ItemPreparacion, KpiMesas, KpiPreparacion, MesaResumen } from './api.models';
+import { AbrirMesaRequest, CambiarEstadoItemRequest, ComandaCreada, CrearComandaRequest, Destino, ItemPreparacion, KpiMesas, KpiPreparacion, MesaResumen, ProductoResumen } from './api.models';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = environment.apiUrl;
   private readonly mockDelayMs = 350;
+  readonly mocksHabilitados = environment.useMocks;
   private readonly mockUsers: LoginResponse['usuario'][] = [
     { id: 1, nombre: 'Ana Administración', usuario: 'admin', rol: 'ADMIN' },
     { id: 2, nombre: 'Martín Mozo', usuario: 'mozo', rol: 'MOZO' },
@@ -34,6 +35,19 @@ export class ApiService {
     { id: 4, comandaId: 201, numeroComanda: 1, mesaNumero: 2, nombreProducto: 'Cerveza pinta', cantidad: 2, estado: 'PENDIENTE', destino: 'BARRA', fechaEnvio: new Date(Date.now() - 9 * 60000).toISOString() },
     { id: 5, comandaId: 202, numeroComanda: 1, mesaNumero: 4, nombreProducto: 'Gaseosa', cantidad: 3, observacion: 'Dos sin hielo', estado: 'EN_PREPARACION', destino: 'BARRA', fechaEnvio: new Date(Date.now() - 5 * 60000).toISOString() },
   ];
+  private readonly mockProductos: ProductoResumen[] = [
+    { id: 1, nombre: 'Cerveza pinta', precio: 6500, destino: 'BARRA' },
+    { id: 2, nombre: 'Gaseosa', precio: 3500, destino: 'BARRA' },
+    { id: 3, nombre: 'Hamburguesa completa', precio: 14000, destino: 'COCINA' },
+    { id: 4, nombre: 'Porción de papas', precio: 7000, destino: 'COCINA' },
+    { id: 5, nombre: 'Pizza especial', precio: 16000, destino: 'COCINA' },
+  ];
+  private readonly mockItemsPorCuenta = new Map<number, ItemPreparacion[]>([
+    [101, this.mockItems.filter((item) => item.comandaId === 201)],
+    [102, this.mockItems.filter((item) => item.comandaId === 202)],
+    [103, this.mockItems.filter((item) => item.comandaId === 203)],
+  ]);
+  private mockSiguienteComandaId = 204;
 
   get<T>(endpoint: string, params?: Record<string, string | number | boolean>): Observable<T> {
     let httpParams = new HttpParams();
@@ -102,6 +116,48 @@ export class ApiService {
     return this.post<MesaResumen, AbrirMesaRequest>('cuentas', { mesaId });
   }
 
+  obtenerProductos(): Observable<ProductoResumen[]> {
+    if (environment.useMocks) return of(structuredClone(this.mockProductos)).pipe(delay(this.mockDelayMs));
+    return this.get<ProductoResumen[]>('productos');
+  }
+
+  enviarComanda(cuentaId: number, request: CrearComandaRequest): Observable<ComandaCreada> {
+    if (environment.useMocks) {
+      const mesa = this.mockMesas.find((item) => item.cuentaId === cuentaId);
+      if (!mesa) return throwError(() => ({ status: 404, error: { mensaje: 'No se encontró la cuenta activa.' } }));
+
+      const comandaId = this.mockSiguienteComandaId++;
+      const numero = (this.mockItemsPorCuenta.get(cuentaId)?.reduce((maximo, item) => Math.max(maximo, item.numeroComanda), 0) ?? 0) + 1;
+      const fechaEnvio = new Date().toISOString();
+      const items = request.items.map((linea, indice): ItemPreparacion => {
+        const producto = this.mockProductos.find((item) => item.id === linea.productoId);
+        if (!producto) throw new Error(`Producto mock ${linea.productoId} inexistente`);
+        return {
+          id: Date.now() + indice,
+          comandaId,
+          numeroComanda: numero,
+          mesaNumero: mesa.numero,
+          nombreProducto: producto.nombre,
+          cantidad: linea.cantidad,
+          observacion: linea.observacion?.trim() || undefined,
+          estado: 'PENDIENTE',
+          destino: producto.destino,
+          fechaEnvio,
+        };
+      });
+
+      this.mockItems = [...this.mockItems, ...items];
+      this.mockItemsPorCuenta.set(cuentaId, [...(this.mockItemsPorCuenta.get(cuentaId) ?? []), ...items]);
+      return of({ id: comandaId, numero, fechaEnvio, items: structuredClone(items) }).pipe(delay(this.mockDelayMs));
+    }
+    return this.post<ComandaCreada, CrearComandaRequest>(`cuentas/${cuentaId}/comandas`, request);
+  }
+
+  obtenerItemsCuenta(cuentaId: number): Observable<ItemPreparacion[]> {
+    if (environment.useMocks) return of(structuredClone(this.mockItemsPorCuenta.get(cuentaId) ?? [])).pipe(delay(this.mockDelayMs));
+    return this.get<ItemPreparacion[]>(`cuentas/${cuentaId}/items`);
+  }
+
   obtenerItemsPorSector(destino: Destino): Observable<ItemPreparacion[]> {
     if (environment.useMocks) {
       const items = this.mockItems.filter((item) => item.destino === destino).sort((a, b) => a.fechaEnvio.localeCompare(b.fechaEnvio));
@@ -131,6 +187,9 @@ export class ApiService {
       if (!item) return throwError(() => ({ status: 404, error: { mensaje: 'No se encontró el ítem.' } }));
       const actualizado = { ...item, estado };
       this.mockItems = this.mockItems.map((actual) => actual.id === itemId ? actualizado : actual);
+      this.mockItemsPorCuenta.forEach((items, cuentaId) => {
+        this.mockItemsPorCuenta.set(cuentaId, items.map((actual) => actual.id === itemId ? actualizado : actual));
+      });
       return of(structuredClone(actualizado)).pipe(delay(this.mockDelayMs));
     }
     return this.patch<ItemPreparacion, CambiarEstadoItemRequest>(`preparacion/items/${itemId}/estado`, { estado });

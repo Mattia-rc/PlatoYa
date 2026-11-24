@@ -8,7 +8,7 @@ import { TagModule } from 'primeng/tag';
 import { ApiService } from '../../core/http/api.service';
 import { Destino, EstadoItem, ItemPreparacion } from '../../core/http/api.models';
 import { PollingService } from '../../core/polling/polling.service';
-import { forkJoin } from 'rxjs';
+import { forkJoin, map, Observable } from 'rxjs';
 import { KpiPreparacion } from '../../core/http/api.models';
 
 @Component({ selector: 'app-sector-dashboard', standalone: true, imports: [DatePipe, ButtonModule, ProgressSpinnerModule, TagModule], templateUrl: './sector-dashboard.html', styleUrl: './sector-dashboard.css' })
@@ -38,7 +38,11 @@ export class SectorDashboard {
   }
 
   private iniciarPolling(): void {
-    this.polling.poll(() => forkJoin({ items: this.api.obtenerItemsPorSector(this.sector), kpis: this.api.obtenerKpisPreparacion(this.sector) }), this.destroyRef).subscribe({
+    const cargarPanel: () => Observable<{ items: ItemPreparacion[]; kpis: KpiPreparacion | null }> = () => this.api.mocksHabilitados
+      ? forkJoin({ items: this.api.obtenerItemsPorSector(this.sector), kpis: this.api.obtenerKpisPreparacion(this.sector) })
+      : this.api.obtenerItemsPorSector(this.sector).pipe(map((items) => ({ items, kpis: null })));
+
+    this.polling.poll(cargarPanel, this.destroyRef).subscribe({
       next: ({ items, kpis }) => { this.items.set(items); this.kpis.set(kpis); this.cargando.set(false); this.error.set(''); },
       error: () => { this.cargando.set(false); this.error.set(`No se pudo cargar la pantalla de ${this.sector.toLowerCase()}.`); },
     });

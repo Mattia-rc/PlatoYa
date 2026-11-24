@@ -7,6 +7,7 @@ export const routes: Routes = [
     path: '', canActivate: [authGuard], loadComponent: () => import('./layout/app-layout').then((m) => m.AppLayout),
     children: [
       { path: 'mozo', canActivate: [roleGuard(['MOZO', 'ADMIN'])], loadComponent: () => import('./features/mozo/mozo-dashboard').then((m) => m.MozoDashboard) },
+      { path: 'mozo/mesas/:mesaId/cuenta/:cuentaId', canActivate: [roleGuard(['MOZO', 'ADMIN'])], loadComponent: () => import('./features/mozo/comanda-page').then((m) => m.ComandaPage) },
       { path: 'cocina', canActivate: [roleGuard(['COCINA', 'ADMIN'])], loadComponent: () => import('./features/sector/sector-dashboard').then((m) => m.SectorDashboard), data: { sector: 'COCINA' } },
       { path: 'barra', canActivate: [roleGuard(['BARRA', 'ADMIN'])], loadComponent: () => import('./features/sector/sector-dashboard').then((m) => m.SectorDashboard), data: { sector: 'BARRA' } },
       { path: '', pathMatch: 'full', redirectTo: 'mozo' },

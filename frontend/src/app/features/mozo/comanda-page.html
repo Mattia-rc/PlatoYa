@@ -1,0 +1,72 @@
+<section class="page-header">
+  <div>
+    <a routerLink="/mozo" class="back-link"><i class="pi pi-chevron-left"></i> Volver a mesas</a>
+    <p class="eyebrow">ATENCIÓN DE MESA</p>
+    <h1>Mesa {{ mesaNumero }}</h1>
+    <p>Cuenta #{{ cuentaId }} · Cargá productos y seguí su preparación.</p>
+  </div>
+  <span class="polling"><i></i> Estados cada 5 segundos</span>
+</section>
+
+@if (error()) { <div class="message error"><i class="pi pi-exclamation-circle"></i>{{ error() }}</div> }
+@if (exito()) { <div class="message success"><i class="pi pi-check-circle"></i>{{ exito() }}</div> }
+
+<div class="workspace">
+  <section class="panel composer">
+    <div class="panel-title"><div><span class="step">1</span><h2>Nueva comanda</h2></div><small>Los productos se envían a su sector automáticamente.</small></div>
+
+    <div class="form-grid">
+      <div class="field product-field">
+        <label for="producto">Producto</label>
+        <p-select inputId="producto" [options]="productos()" optionLabel="nombre" optionValue="id" [(ngModel)]="productoId" placeholder="Elegí un producto" [filter]="true" filterBy="nombre" [fluid]="true">
+          <ng-template #item let-producto>
+            <div class="product-option"><span>{{ producto.nombre }}</span><small>{{ producto.destino }} · {{ producto.precio | currency:'ARS':'symbol-narrow':'1.0-0' }}</small></div>
+          </ng-template>
+        </p-select>
+      </div>
+      <div class="field quantity-field">
+        <label for="cantidad">Cantidad</label>
+        <p-inputnumber inputId="cantidad" [(ngModel)]="cantidad" [min]="1" [max]="99" [showButtons]="true" buttonLayout="horizontal" [fluid]="true" />
+      </div>
+      <div class="field observation-field">
+        <label for="observacion">Observación <span>opcional</span></label>
+        <textarea pTextarea id="observacion" [(ngModel)]="observacion" rows="2" maxlength="200" placeholder="Ej. sin cebolla" [fluid]="true"></textarea>
+      </div>
+      <p-button label="Agregar" icon="pi pi-plus" (onClick)="agregarLinea()" styleClass="add-button" />
+    </div>
+
+    @if (!lineas().length) {
+      <div class="draft-empty"><i class="pi pi-shopping-basket"></i><p>Todavía no agregaste productos.</p></div>
+    } @else {
+      <div class="draft-list">
+        @for (linea of lineas(); track $index) {
+          <article class="draft-line">
+            <span class="line-quantity">{{ linea.cantidad }}×</span>
+            <div><strong>{{ linea.producto.nombre }}</strong><small>{{ linea.producto.destino }}@if (linea.observacion) { · {{ linea.observacion }} }</small></div>
+            <span class="line-price">{{ linea.producto.precio * linea.cantidad | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
+            <p-button icon="pi pi-trash" severity="danger" [text]="true" ariaLabel="Quitar producto" (onClick)="quitarLinea($index)" />
+          </article>
+        }
+      </div>
+      <footer class="draft-footer"><div><span>Total estimado</span><strong>{{ totalBorrador() | currency:'ARS':'symbol-narrow':'1.0-0' }}</strong></div><p-button label="Enviar comanda" icon="pi pi-send" [loading]="enviando()" (onClick)="enviarComanda()" /></footer>
+    }
+  </section>
+
+  <section class="panel tracking">
+    <div class="panel-title"><div><span class="step">2</span><h2>Seguimiento</h2></div><small>Estado actual de todos los ítems de la cuenta.</small></div>
+    @if (cargando()) {
+      <div class="center"><p-progress-spinner ariaLabel="Cargando ítems" /></div>
+    } @else if (!items().length) {
+      <div class="tracking-empty"><i class="pi pi-receipt"></i><h3>Sin comandas enviadas</h3><p>Los productos aparecerán acá después del envío.</p></div>
+    } @else {
+      <div class="items-list">
+        @for (item of items(); track item.id) {
+          <article class="item-row" [class.cancelled]="item.estado === 'ANULADO'">
+            <div class="item-main"><span class="line-quantity">{{ item.cantidad }}×</span><div><strong>{{ item.nombreProducto }}</strong><small>Comanda #{{ item.numeroComanda }} · {{ item.destino }} · {{ item.fechaEnvio | date:'HH:mm' }}@if (item.observacion) { · {{ item.observacion }} }</small></div></div>
+            <p-tag [value]="item.estado.replace('_', ' ')" [severity]="severidad(item.estado)" />
+          </article>
+        }
+      </div>
+    }
+  </section>
+</div>

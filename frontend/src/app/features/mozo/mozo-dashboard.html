@@ -23,7 +23,7 @@
           <p-button label="Abrir mesa" icon="pi pi-plus" [loading]="mesaProcesando() === mesa.id" (onClick)="abrirMesa(mesa)" />
         } @else {
           <div class="account"><span>Cuenta activa</span><strong>#{{ mesa.cuentaId ?? '—' }}</strong></div>
-          <p-button label="Ver comanda" icon="pi pi-arrow-right" iconPos="right" severity="secondary" [outlined]="true" />
+          <p-button label="Ver comanda" icon="pi pi-receipt" severity="secondary" [outlined]="true" (onClick)="verComanda(mesa)" />
         }
       </article>
     }
