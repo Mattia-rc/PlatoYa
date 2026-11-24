@@ -103,6 +103,11 @@ Necesita Docker corriendo: `MigracionesTest` levanta un PostgreSQL 16 con Testco
 ```text
 src/main/java/com/platoya/
 ├── PlatoYaApplication.java
+├── auth/        SecurityConfig, JwtConfig, AuthController, AuthService, LoginRequest, LoginResponse,
+│                UsuarioSesion, CredencialesInvalidasException
+├── usuarios/    Usuario, Rol, UsuarioRepository
+├── mesas/       Mesa, EstadoMesa, MesaRepository, MesaController, MesaService, MesaResumen
+├── cuentas/     Cuenta, EstadoCuenta, CuentaRepository, CuentaController, CuentaService, AbrirMesaRequest
 └── common/
     ├── error/   ErrorResponse, NegocioException, RecursoNoEncontradoException, GlobalExceptionHandler
     └── config/  CorsConfig

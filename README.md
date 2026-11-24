@@ -33,6 +33,54 @@ evidencia obtenida de una entrevista.
 
 ---
 
+## ▶️ Cómo levantar el proyecto
+
+Requisito: Docker Desktop corriendo. Para trabajar fuera de Docker también hacen falta JDK 21, Maven 3.9 y Node 24.
+
+### Entorno completo con Docker
+
+Desde la raíz del repositorio:
+
+```bash
+cp .env.example .env        # en Windows: copy .env.example .env
+docker compose up --build
+```
+
+| Servicio | URL |
+|---|---|
+| Frontend | http://localhost:4200 |
+| Backend | http://localhost:8080/api |
+| PostgreSQL | localhost:5432 |
+
+Usuarios de prueba: `admin`, `mozo`, `cocina` y `barra`, todos con contraseña `1234`.
+Flyway carga estos usuarios y los datos de prueba al arrancar el backend.
+
+> **Los cambios de código no se ven automáticamente.** Cada imagen se construye con
+> una copia del código. Después de un cambio hay que reconstruir el servicio:
+> `docker compose up --build -d backend` o `docker compose up --build -d frontend`.
+
+- Bajar el entorno: `docker compose down`.
+- Borrar también los datos: `docker compose down -v`. Esto hace falta si se modifica una migración de Flyway ya aplicada.
+- Si un puerto está ocupado, se cambia en `.env`.
+
+Este modo conviene para probar todo integrado o para una demo.
+
+### Modo desarrollo (recomendado para trabajar)
+
+Solo la base corre en Docker:
+
+1. Base: `docker compose up db`.
+2. Backend: `mvn spring-boot:run` desde `backend/`. Requiere `JWT_SECRET` y, en Windows, un ajuste de zona horaria. Los detalles están en el [README del backend](backend/README.md).
+3. Frontend: `npm install` y `npm start` desde `frontend/`. La app se recarga sola al guardar.
+   En desarrollo usa **datos simulados** (`useMocks: true`). Para usar la API real, ver el [README del frontend](frontend/README.md).
+
+### Tests
+
+- Backend: `mvn test` desde `backend/`. Necesita Docker, porque usa Testcontainers.
+- Frontend: `npm test` desde `frontend/`.
+
+---
+
 
 ## 📋 1. Identificación y Análisis de la Problemática
 
