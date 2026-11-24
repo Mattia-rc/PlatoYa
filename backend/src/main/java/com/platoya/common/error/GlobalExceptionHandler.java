@@ -8,12 +8,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import com.platoya.auth.CredencialesInvalidasException;
+import com.platoya.auth.SecurityConfig;
 
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
@@ -87,6 +91,17 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> negocio(NegocioException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ErrorResponse.conCodigo(ex.getMessage(), ex.getCodigo()));
+    }
+
+    @ExceptionHandler(CredencialesInvalidasException.class)
+    public ResponseEntity<ErrorResponse> credencialesInvalidas(CredencialesInvalidasException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ErrorResponse.de(ex.getMessage()));
+    }
+
+    // Sin este caso, el manejador genérico la convierte en 500.
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> accesoDenegado(AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.de(SecurityConfig.MENSAJE_SIN_PERMISO));
     }
 
     @ExceptionHandler(Exception.class)
