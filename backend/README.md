@@ -107,7 +107,11 @@ src/main/java/com/platoya/
 │                UsuarioSesion, CredencialesInvalidasException
 ├── usuarios/    Usuario, Rol, UsuarioRepository
 ├── mesas/       Mesa, EstadoMesa, MesaRepository, MesaController, MesaService, MesaResumen
+├── catalogo/    Categoria, Producto, Destino, ProductoRepository, ProductoController, ProductoResumen
 ├── cuentas/     Cuenta, EstadoCuenta, CuentaRepository, CuentaController, CuentaService, AbrirMesaRequest
+├── comandas/    Comanda, ItemComanda, EstadoItem, ComandaRepository, ItemComandaRepository,
+│                ComandaController (POST cuentas/{id}/comandas y GET cuentas/{id}/items), ComandaService,
+│                CrearComandaRequest, CrearItemComandaRequest, ComandaCreada, ItemPreparacion
 └── common/
     ├── error/   ErrorResponse, NegocioException, RecursoNoEncontradoException, GlobalExceptionHandler
     └── config/  CorsConfig
