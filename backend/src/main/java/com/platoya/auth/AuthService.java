@@ -18,7 +18,7 @@ import com.platoya.usuarios.UsuarioRepository;
 public class AuthService {
 
     static final String CLAIM_USUARIO = "usuario";
-    static final String CLAIM_ROL = "rol";
+    public static final String CLAIM_ROL = "rol";
 
     private final UsuarioRepository usuarios;
     private final PasswordEncoder passwordEncoder;

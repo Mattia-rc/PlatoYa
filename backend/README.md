@@ -112,6 +112,8 @@ src/main/java/com/platoya/
 ├── comandas/    Comanda, ItemComanda, EstadoItem, ComandaRepository, ItemComandaRepository,
 │                ComandaController (POST cuentas/{id}/comandas y GET cuentas/{id}/items), ComandaService,
 │                CrearComandaRequest, CrearItemComandaRequest, ComandaCreada, ItemPreparacion
+├── preparacion/ PreparacionController (GET preparacion/items y PATCH preparacion/items/{id}/estado),
+│                PreparacionService, CambiarEstadoItemRequest
 └── common/
     ├── error/   ErrorResponse, NegocioException, RecursoNoEncontradoException, GlobalExceptionHandler
     └── config/  CorsConfig

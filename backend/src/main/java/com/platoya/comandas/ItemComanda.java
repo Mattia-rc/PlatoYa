@@ -96,6 +96,19 @@ public class ItemComanda {
         return item;
     }
 
+    // RN-16: solo PENDIENTE → EN_PREPARACION → LISTO. Cada paso setea su fecha, como exige ck_items_fechas_estado.
+    public boolean avanzarA(EstadoItem nuevo, OffsetDateTime fecha) {
+        if (estado == EstadoItem.PENDIENTE && nuevo == EstadoItem.EN_PREPARACION) {
+            fechaPreparacion = fecha;
+        } else if (estado == EstadoItem.EN_PREPARACION && nuevo == EstadoItem.LISTO) {
+            fechaListo = fecha;
+        } else {
+            return false;
+        }
+        estado = nuevo;
+        return true;
+    }
+
     public Long getId() {
         return id;
     }
