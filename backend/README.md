@@ -90,11 +90,12 @@ Todos los errores responden con el formato que usa el front (`ApiError`):
 mvn test
 ```
 
-Necesita Docker corriendo: `MigracionesTest` levanta un PostgreSQL 16 con Testcontainers y verifica V1, V2 y la validación de JPA.
+Necesita Docker corriendo: `MigracionesTest` y `RecorridoVerticalTest` levantan un PostgreSQL 16 con Testcontainers.
 
 | Test | Qué cubre |
 |---|---|
 | `MigracionesTest` | Migraciones y datos de prueba contra PostgreSQL 16. |
+| `RecorridoVerticalTest` | Prueba vertical (PYA-003) con login JWT real sobre V2: recorrido completo, RN-01, 401, 403 por rol y sector, y RN-16. |
 | `common.GlobalExceptionHandlerTest` | Formato y códigos de error (400, 404, 409, 500). |
 | `common.CorsConfigTest` | CORS: acepta el origen del front y rechaza otros. |
 
