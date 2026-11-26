@@ -16,6 +16,8 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
 
@@ -72,8 +74,15 @@ public class GlobalExceptionHandler {
         return validacionInvalida(detalles);
     }
 
+    /** Un valor con tipo inválido en el cuerpo, como un enum inexistente, se detalla en su campo. */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> cuerpoIlegible(HttpMessageNotReadableException ex) {
+        if (ex.getCause() instanceof InvalidFormatException formato && !formato.getPath().isEmpty()) {
+            String campo = formato.getPath().get(formato.getPath().size() - 1).getFieldName();
+            if (campo != null) {
+                return validacionInvalida(Map.of(campo, MENSAJE_FORMATO_INVALIDO));
+            }
+        }
         return ResponseEntity.badRequest().body(ErrorResponse.de(MENSAJE_CUERPO_ILEGIBLE));
     }
 

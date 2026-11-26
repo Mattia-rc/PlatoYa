@@ -97,6 +97,16 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void enumInvalido_devuelve400ConDetalleDelCampo() throws Exception {
+        mvc.perform(post("/prueba/enum")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"rol\": \"JEFE\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje").value(MENSAJE_VALIDACION))
+                .andExpect(jsonPath("$.detalles.rol").value("El valor no tiene el formato esperado."));
+    }
+
+    @Test
     void metodoNoSoportado_conservaEstado405() throws Exception {
         mvc.perform(delete("/prueba/negocio"))
                 .andExpect(status().isMethodNotAllowed())
@@ -144,11 +154,20 @@ class GlobalExceptionHandlerTest {
     record PedidoPrueba(@NotBlank(message = "El nombre es obligatorio.") String nombre) {
     }
 
+    enum RolPrueba { ADMIN, MOZO }
+
+    record PedidoConEnum(RolPrueba rol) {
+    }
+
     @RestController
     static class ControladorPrueba {
 
         @PostMapping("/prueba/validacion")
         void validacion(@Valid @RequestBody PedidoPrueba pedido) {
+        }
+
+        @PostMapping("/prueba/enum")
+        void conEnum(@RequestBody PedidoConEnum pedido) {
         }
 
         @GetMapping("/prueba/mesas/{id}")
