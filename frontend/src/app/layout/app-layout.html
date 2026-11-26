@@ -6,8 +6,8 @@
     </a>
     <nav aria-label="Navegación principal">
       @if (role() === 'MOZO' || role() === 'ADMIN') { <a routerLink="/mozo" routerLinkActive="active">Mesas</a> }
-      @if (role() === 'COCINA' || role() === 'ADMIN') { <a routerLink="/cocina" routerLinkActive="active">Cocina</a> }
-      @if (role() === 'BARRA' || role() === 'ADMIN') { <a routerLink="/barra" routerLinkActive="active">Barra</a> }
+      @if (role() === 'COCINA') { <a routerLink="/cocina" routerLinkActive="active">Cocina</a> }
+      @if (role() === 'BARRA') { <a routerLink="/barra" routerLinkActive="active">Barra</a> }
     </nav>
     <div class="session">
       <span><strong>{{ auth.currentUser()?.nombre }}</strong><small>{{ role() }}</small></span>
