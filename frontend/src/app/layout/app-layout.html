@@ -8,6 +8,7 @@
       @if (role() === 'MOZO' || role() === 'ADMIN') { <a routerLink="/mozo" routerLinkActive="active">Mesas</a> }
       @if (role() === 'COCINA') { <a routerLink="/cocina" routerLinkActive="active">Cocina</a> }
       @if (role() === 'BARRA') { <a routerLink="/barra" routerLinkActive="active">Barra</a> }
+      @if (role() === 'ADMIN') { <a routerLink="/usuarios" routerLinkActive="active">Usuarios</a> }
     </nav>
     <div class="session">
       <span><strong>{{ auth.currentUser()?.nombre }}</strong><small>{{ role() }}</small></span>
