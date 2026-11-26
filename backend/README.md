@@ -36,6 +36,8 @@ mvn spring-boot:run
 
 El datasource se toma de las variables `DB_URL`, `DB_USER` y `DB_PASSWORD`. Por defecto apunta a `jdbc:postgresql://localhost:5432/platoya` con usuario y clave `platoya`. Hay que definirlas si el `.env` usa otros valores.
 
+> **`JWT_SECRET` es obligatoria:** no tiene valor por defecto y el arranque falla si falta o tiene menos de 32 bytes. Al correr desde Maven o el IDE, definila como variable de entorno (podés copiar el valor de desarrollo de `.env.example`). Los tests ya tienen su propio secreto en el `pom.xml`.
+
 > **Windows con zona horaria de Argentina:** la JVM informa la zona `America/Buenos_Aires`, que la imagen `postgres:16` no reconoce, y la conexión falla con `invalid value for parameter "TimeZone"`. Al correr desde el IDE, agregá la opción de VM `-Duser.timezone=America/Argentina/Buenos_Aires`. Los tests ya la tienen configurada en el `pom.xml`.
 
 ## Configuración
@@ -46,6 +48,8 @@ El datasource se toma de las variables `DB_URL`, `DB_USER` y `DB_PASSWORD`. Por 
 | `spring.datasource.username` | `DB_USER` | `platoya` |
 | `spring.datasource.password` | `DB_PASSWORD` | `platoya` |
 | `platoya.cors.allowed-origins` | `CORS_ALLOWED_ORIGINS` | `http://localhost:4200` |
+| `platoya.jwt.secret` | `JWT_SECRET` | sin valor por defecto (32 bytes o más) |
+| `platoya.jwt.expiracion` | — | `12h` |
 
 - Todas las rutas van bajo `/api` (`server.servlet.context-path`).
 - `spring.jpa.hibernate.ddl-auto=validate`: el esquema lo crea Flyway y JPA solo lo valida.
@@ -86,11 +90,13 @@ Todos los errores responden con el formato que usa el front (`ApiError`):
 mvn test
 ```
 
-Necesita Docker corriendo: `MigracionesTest` levanta un PostgreSQL 16 con Testcontainers y verifica V1, V2 y la validación de JPA.
+Necesita Docker corriendo: `MigracionesTest` y `auth.AutenticacionTest` levantan un PostgreSQL 16 con Testcontainers.
 
 | Test | Qué cubre |
 |---|---|
 | `MigracionesTest` | Migraciones y datos de prueba contra PostgreSQL 16. |
+| `auth.AutenticacionTest` | Login JWT sobre los usuarios de V2 (correcto, credenciales inválidas, usuario dado de baja, datos vacíos), vencimiento de 12 h, 401 por token ausente, vencido, de otra clave o mal formado, y 403 por rol. |
+| `auth.JwtConfigTest` | `JWT_SECRET` ausente o de menos de 32 bytes. |
 | `common.GlobalExceptionHandlerTest` | Formato y códigos de error (400, 404, 409, 500). |
 | `common.CorsConfigTest` | CORS: acepta el origen del front y rechaza otros. |
 
@@ -99,12 +105,15 @@ Necesita Docker corriendo: `MigracionesTest` levanta un PostgreSQL 16 con Testco
 ```text
 src/main/java/com/platoya/
 ├── PlatoYaApplication.java
+├── auth/        SecurityConfig, JwtConfig, AuthController, AuthService, LoginRequest, LoginResponse,
+│                UsuarioSesion, CredencialesInvalidasException
+├── usuarios/    Usuario, Rol, UsuarioRepository
 └── common/
     ├── error/   ErrorResponse, NegocioException, RecursoNoEncontradoException, GlobalExceptionHandler
     └── config/  CorsConfig
 ```
 
-Cada módulo funcional (M01 a M10) agrega su paquete con su HU: controladores, DTO, servicios, entidades y repositorios. Spring Security y JWT entran con la prueba vertical y M01.
+Cada módulo funcional (M01 a M10) agrega su paquete con su HU: controladores, DTO, servicios, entidades y repositorios. Los endpoints nuevos requieren token por defecto y cada módulo agrega su `@PreAuthorize` por rol.
 
 ## Documentación relacionada
 

@@ -156,8 +156,8 @@ Se utilizarán los roles definidos en la propuesta:
 - No se incluirán contraseñas reales, claves de firma ni credenciales en Git.
 - Las credenciales del entorno se configurarán externamente.
 - El frontend recibirá únicamente los datos necesarios.
-- La política de almacenamiento y renovación de tokens se definirá
-  antes de implementar la autenticación.
+- Política de tokens: solo access token JWT HS256 con vencimiento de 12 h, sin refresh token.
+  El front lo guarda en `sessionStorage` y el cierre de sesión lo borra; no hay lista de tokens revocados.
 
 ## 8. Actualización de estados
 
