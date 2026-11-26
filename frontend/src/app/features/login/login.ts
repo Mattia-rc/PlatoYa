@@ -19,7 +19,7 @@ export class Login {
     if (!this.usuario.trim() || !this.contrasena) { this.error.set('Completá usuario y contraseña.'); return; }
     this.cargando.set(true);
     this.error.set('');
-    this.auth.login({ usuario: this.usuario.trim().toLowerCase(), contrasena: this.contrasena.trim() }).subscribe({
+    this.auth.login({ usuario: this.usuario.trim(), contrasena: this.contrasena }).subscribe({
       next: (response) => {
         this.cargando.set(false);
         window.location.assign(this.auth.homeForRole(response.usuario.rol));
