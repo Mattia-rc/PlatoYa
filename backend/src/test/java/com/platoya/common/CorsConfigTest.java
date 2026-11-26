@@ -13,8 +13,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.platoya.auth.JwtConfig;
+import com.platoya.auth.SecurityConfig;
+
+/** El preflight pasa por la cadena de Security real (sin token), como en producción. */
 @WebMvcTest(CorsConfigTest.ControladorCors.class)
-@Import(CorsConfigTest.ControladorCors.class)
+@Import({ CorsConfigTest.ControladorCors.class, SecurityConfig.class, JwtConfig.class })
 class CorsConfigTest {
 
     @Autowired

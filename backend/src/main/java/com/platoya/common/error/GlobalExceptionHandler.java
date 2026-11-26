@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -25,6 +26,9 @@ import jakarta.validation.Path;
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    public static final String MENSAJE_NO_AUTENTICADO = "Tenés que iniciar sesión.";
+    public static final String MENSAJE_SIN_PERMISO = "No tenés permiso para realizar esta operación.";
 
     static final String MENSAJE_VALIDACION = "Los datos enviados no son válidos.";
     static final String MENSAJE_FORMATO_INVALIDO = "El valor no tiene el formato esperado.";
@@ -87,6 +91,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> negocio(NegocioException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ErrorResponse.conCodigo(ex.getMessage(), ex.getCodigo()));
+    }
+
+    // Sin este caso, el manejador genérico la convierte en 500.
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> accesoDenegado(AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.de(MENSAJE_SIN_PERMISO));
     }
 
     @ExceptionHandler(Exception.class)

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.platoya.auth.JwtConfig;
+import com.platoya.auth.SecurityConfig;
 import com.platoya.common.error.NegocioException;
 import com.platoya.common.error.RecursoNoEncontradoException;
 
@@ -31,7 +34,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
 @WebMvcTest({ GlobalExceptionHandlerTest.ControladorPrueba.class, GlobalExceptionHandlerTest.ControladorValidado.class })
-@Import({ GlobalExceptionHandlerTest.ControladorPrueba.class, GlobalExceptionHandlerTest.ControladorValidado.class })
+@Import({ GlobalExceptionHandlerTest.ControladorPrueba.class, GlobalExceptionHandlerTest.ControladorValidado.class,
+        SecurityConfig.class, JwtConfig.class })
+@WithMockUser
 class GlobalExceptionHandlerTest {
 
     private static final String MENSAJE_VALIDACION = "Los datos enviados no son válidos.";
