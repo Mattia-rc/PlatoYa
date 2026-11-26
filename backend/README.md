@@ -79,6 +79,7 @@ Todos los errores responden con el formato que usa el front (`ApiError`):
 |---|---|---|
 | Body inválido (validación) | 400 | `mensaje`, `detalles` |
 | Parámetro de ruta o de consulta inválido (tipo incorrecto o restricción como `@Min`) | 400 | `mensaje`, `detalles` por parámetro |
+| Body con un valor de formato inválido (por ejemplo, un enum inexistente) | 400 | `mensaje`, `detalles` del campo |
 | Body ilegible | 400 | `mensaje` |
 | Recurso inexistente (`RecursoNoEncontradoException` o ruta inexistente) | 404 | `mensaje` |
 | Regla de negocio (`NegocioException`) | 409 | `mensaje`, `codigo` |
@@ -90,14 +91,15 @@ Todos los errores responden con el formato que usa el front (`ApiError`):
 mvn test
 ```
 
-Necesita Docker corriendo: `MigracionesTest` y `auth.AutenticacionTest` levantan un PostgreSQL 16 con Testcontainers.
+Necesita Docker corriendo: `MigracionesTest`, `auth.AutenticacionTest` y `usuarios.UsuariosTest` levantan cada uno su PostgreSQL 16 con Testcontainers.
 
 | Test | Qué cubre |
 |---|---|
 | `MigracionesTest` | Migraciones y datos de prueba contra PostgreSQL 16. |
 | `auth.AutenticacionTest` | Login JWT sobre los usuarios de V2 (correcto, credenciales inválidas, usuario dado de baja, datos vacíos), vencimiento de 12 h, 401 por token ausente, vencido, de otra clave o mal formado, y 403 por rol. |
+| `usuarios.UsuariosTest` | ABM de usuarios: alta con login posterior, validaciones (formato del usuario, recorte, campos obligatorios, rol inexistente), usuario repetido, listado, modificación con y sin contraseña, baja lógica y reactivación (RN-23), auto-baja y cambio del propio rol, 404, 403 por rol y 401 sin token. |
 | `auth.JwtConfigTest` | `JWT_SECRET` ausente o de menos de 32 bytes. |
-| `common.GlobalExceptionHandlerTest` | Formato y códigos de error (400, 404, 409, 500). |
+| `common.GlobalExceptionHandlerTest` | Formato y códigos de error (400, 404, 409, 500), incluido el 400 con el detalle del campo cuando el body trae un valor con formato inválido, como un enum inexistente. |
 | `common.CorsConfigTest` | CORS: acepta el origen del front y rechaza otros. |
 
 ## Estructura
@@ -107,7 +109,8 @@ src/main/java/com/platoya/
 ├── PlatoYaApplication.java
 ├── auth/        SecurityConfig, JwtConfig, AuthController, AuthService, LoginRequest, LoginResponse,
 │                UsuarioSesion, CredencialesInvalidasException
-├── usuarios/    Usuario, Rol, UsuarioRepository
+├── usuarios/    Usuario, Rol, UsuarioRepository, UsuarioController, UsuarioService, UsuarioAltaRequest,
+│                UsuarioModificacionRequest, UsuarioResponse
 └── common/
     ├── error/   ErrorResponse, NegocioException, RecursoNoEncontradoException, GlobalExceptionHandler
     └── config/  CorsConfig
