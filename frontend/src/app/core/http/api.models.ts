@@ -47,4 +47,6 @@ export interface KpiPreparacion {
 
 export interface AbrirMesaRequest { mesaId: number; }
 export interface CambiarEstadoItemRequest { estado: EstadoItem; }
-export interface UsuarioResumen { id: number; nombre: string; usuario: string; rol: UserRole; activo: boolean; }
+export interface Usuario { id: number; nombre: string; usuario: string; rol: UserRole; fechaBaja: string | null; }
+export interface UsuarioAltaRequest { nombre: string; usuario: string; contrasena: string; rol: UserRole; }
+export interface UsuarioModificacionRequest { nombre: string; rol: UserRole; contrasena?: string; }

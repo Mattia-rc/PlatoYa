@@ -1,0 +1,69 @@
+<section class="page-header">
+  <div><p class="eyebrow">ADMINISTRACIÓN</p><h1>Usuarios</h1><p>Alta, modificación, baja y reactivación del personal.</p></div>
+  <div class="header-actions">
+    <p-selectbutton [options]="opcionesFiltro" [ngModel]="filtro()" (ngModelChange)="filtro.set($event)" [allowEmpty]="false" optionLabel="label" optionValue="value" aria-label="Filtro de usuarios" />
+    <p-button label="Nuevo usuario" icon="pi pi-plus" (onClick)="nuevo()" />
+  </div>
+</section>
+
+@if (error()) { <div class="error-banner"><i class="pi pi-exclamation-circle"></i>{{ error() }}</div> }
+@if (cargando()) { <div class="center"><p-progress-spinner ariaLabel="Cargando usuarios" /></div> }
+@else if (!usuariosFiltrados().length) { <div class="empty"><i class="pi pi-users"></i><h2>No hay usuarios para mostrar.</h2></div> }
+@else {
+  <div class="card">
+    <p-table [value]="usuariosFiltrados()" dataKey="id">
+      <ng-template #header>
+        <tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Estado</th><th>Fecha de baja</th><th class="actions">Acciones</th></tr>
+      </ng-template>
+      <ng-template #body let-usuario>
+        <tr>
+          <td>{{ usuario.nombre }}</td>
+          <td><code>{{ usuario.usuario }}</code></td>
+          <td>{{ usuario.rol }}</td>
+          <td><p-tag [value]="usuario.fechaBaja ? 'Dado de baja' : 'Activo'" [severity]="usuario.fechaBaja ? 'secondary' : 'success'" /></td>
+          <td>{{ usuario.fechaBaja ? (usuario.fechaBaja | date: 'dd/MM/yyyy HH:mm') : '—' }}</td>
+          <td class="actions">
+            @if (usuario.fechaBaja) {
+              <p-button label="Reactivar" icon="pi pi-refresh" size="small" [text]="true" [disabled]="procesando()" (onClick)="reactivar(usuario)" />
+            } @else {
+              <p-button label="Modificar" icon="pi pi-pencil" size="small" [text]="true" [disabled]="procesando()" (onClick)="modificar(usuario)" />
+              @if (!esPropio(usuario)) {
+                <p-button label="Dar de baja" icon="pi pi-ban" size="small" [text]="true" severity="danger" [disabled]="procesando()" (onClick)="confirmarBaja(usuario)" />
+              }
+            }
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+}
+
+<p-dialog [header]="editando() ? 'Modificar usuario' : 'Nuevo usuario'" [visible]="dialogoVisible()" (visibleChange)="dialogoVisible.set($event)" [modal]="true" [draggable]="false" [style]="{ width: '28rem' }">
+  <form class="user-form" [formGroup]="form" (ngSubmit)="guardar()">
+    @if (errorDialogo()) { <div class="error-banner"><i class="pi pi-exclamation-circle"></i>{{ errorDialogo() }}</div> }
+
+    <label for="nombre">Nombre</label>
+    <input pInputText id="nombre" formControlName="nombre" autocomplete="off" />
+    @if (mensajeCampo('nombre'); as mensaje) { <small class="field-error">{{ mensaje }}</small> }
+
+    <label for="usuario">Usuario</label>
+    <input pInputText id="usuario" formControlName="usuario" autocomplete="off" />
+    @if (mensajeCampo('usuario'); as mensaje) { <small class="field-error">{{ mensaje }}</small> }
+
+    <label for="contrasena">Contraseña</label>
+    <p-password inputId="contrasena" formControlName="contrasena" [feedback]="false" [toggleMask]="true" autocomplete="new-password" styleClass="full" inputStyleClass="full" />
+    @if (editando()) { <small class="hint">Dejala vacía para conservar la actual.</small> }
+    @if (mensajeCampo('contrasena'); as mensaje) { <small class="field-error">{{ mensaje }}</small> }
+
+    <label for="rol">Rol</label>
+    <p-select inputId="rol" formControlName="rol" [options]="roles" placeholder="Elegí un rol" styleClass="full" appendTo="body" />
+    @if (mensajeCampo('rol'); as mensaje) { <small class="field-error">{{ mensaje }}</small> }
+
+    <div class="dialog-actions">
+      <p-button type="button" label="Cancelar" severity="secondary" [outlined]="true" (onClick)="dialogoVisible.set(false)" />
+      <p-button type="submit" label="Guardar" icon="pi pi-check" [loading]="procesando()" />
+    </div>
+  </form>
+</p-dialog>
+
+<p-confirmdialog />

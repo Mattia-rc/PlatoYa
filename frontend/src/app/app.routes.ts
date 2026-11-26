@@ -9,6 +9,7 @@ export const routes: Routes = [
       { path: 'mozo', canActivate: [roleGuard(['MOZO', 'ADMIN'])], loadComponent: () => import('./features/mozo/mozo-dashboard').then((m) => m.MozoDashboard) },
       { path: 'cocina', canActivate: [roleGuard(['COCINA'])], loadComponent: () => import('./features/sector/sector-dashboard').then((m) => m.SectorDashboard), data: { sector: 'COCINA' } },
       { path: 'barra', canActivate: [roleGuard(['BARRA'])], loadComponent: () => import('./features/sector/sector-dashboard').then((m) => m.SectorDashboard), data: { sector: 'BARRA' } },
+      { path: 'usuarios', canActivate: [roleGuard(['ADMIN'])], loadComponent: () => import('./features/usuarios/usuarios-page').then((m) => m.UsuariosPage) },
       { path: '', pathMatch: 'full', redirectTo: 'mozo' },
     ],
   },

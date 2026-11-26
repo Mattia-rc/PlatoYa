@@ -1,0 +1,11 @@
+.page-header { display: flex; justify-content: space-between; align-items: end; gap: 1rem; margin-bottom: 2rem; }.eyebrow { color: var(--p-primary-color); letter-spacing: .14em; font-weight: 800; font-size: .75rem; margin: 0; }h1 { margin: .3rem 0; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -.04em; }.page-header p:last-child { color: var(--text-color-secondary); margin: 0; }
+.header-actions { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.card { background: var(--surface-card); border: 1px solid var(--surface-border); border-radius: 14px; padding: .5rem; box-shadow: 0 8px 24px #0f172a0a; overflow-x: auto; }
+.actions { text-align: right; white-space: nowrap; }
+.error-banner { padding: 1rem; border-radius: 10px; background: var(--p-red-50); color: var(--p-red-700); margin-bottom: 1rem; }.error-banner i { margin-right: .5rem; }
+.center, .empty { min-height: 300px; display: grid; place-items: center; align-content: center; text-align: center; }.empty i { font-size: 2rem; color: var(--text-color-secondary); }.empty h2 { margin-bottom: 0; font-size: 1.1rem; }
+.user-form { display: flex; flex-direction: column; gap: .4rem; }.user-form label { margin-top: .6rem; font-weight: 600; }.user-form input { width: 100%; }
+:host ::ng-deep .full { width: 100%; }
+.field-error { color: var(--p-red-600); }.hint { color: var(--text-color-secondary); }
+.dialog-actions { display: flex; justify-content: flex-end; gap: .5rem; margin-top: 1.25rem; }
+@media (max-width: 650px) { .page-header { align-items: start; flex-direction: column; } }
