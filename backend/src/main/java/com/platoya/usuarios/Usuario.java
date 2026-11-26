@@ -2,6 +2,8 @@ package com.platoya.usuarios;
 
 import java.time.OffsetDateTime;
 
+import com.platoya.common.error.NegocioException;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,6 +16,8 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "usuarios")
 public class Usuario {
+
+    private static final String RN_BAJA_LOGICA = "RN-23";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,6 +40,44 @@ public class Usuario {
     private OffsetDateTime fechaBaja;
 
     protected Usuario() {
+    }
+
+    public Usuario(String nombre, String nombreUsuario, String passwordHash, Rol rol) {
+        this.nombre = nombre;
+        this.nombreUsuario = nombreUsuario;
+        this.passwordHash = passwordHash;
+        this.rol = rol;
+    }
+
+    public void modificar(String nombre, Rol rol) {
+        exigirActivo();
+        this.nombre = nombre;
+        this.rol = rol;
+    }
+
+    public void asignarPasswordHash(String passwordHash) {
+        exigirActivo();
+        this.passwordHash = passwordHash;
+    }
+
+    public void darDeBaja(OffsetDateTime fecha) {
+        if (!estaActivo()) {
+            throw new NegocioException(RN_BAJA_LOGICA, "El usuario ya está dado de baja.");
+        }
+        this.fechaBaja = fecha;
+    }
+
+    public void reactivar() {
+        if (estaActivo()) {
+            throw new NegocioException(RN_BAJA_LOGICA, "El usuario ya está activo.");
+        }
+        this.fechaBaja = null;
+    }
+
+    private void exigirActivo() {
+        if (!estaActivo()) {
+            throw new NegocioException(RN_BAJA_LOGICA, "El usuario está dado de baja. Reactivalo para modificarlo.");
+        }
     }
 
     public Long getId() {
