@@ -105,7 +105,10 @@ public class GlobalExceptionHandler {
         // en lugar de convertirlas en 500.
         if (ex instanceof org.springframework.web.ErrorResponse errorMvc
                 && errorMvc.getStatusCode().is4xxClientError()) {
-            return ResponseEntity.status(errorMvc.getStatusCode()).body(ErrorResponse.de(MENSAJE_SOLICITUD_INVALIDA));
+            // Conserva los headers que trae la excepción, como Allow en el 405.
+            return ResponseEntity.status(errorMvc.getStatusCode())
+                    .headers(errorMvc.getHeaders())
+                    .body(ErrorResponse.de(MENSAJE_SOLICITUD_INVALIDA));
         }
         log.error("Error no controlado", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.de(MENSAJE_INESPERADO));
