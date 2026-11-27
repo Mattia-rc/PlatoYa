@@ -10,6 +10,7 @@ export const routes: Routes = [
       { path: 'cocina', canActivate: [roleGuard(['COCINA'])], loadComponent: () => import('./features/sector/sector-dashboard').then((m) => m.SectorDashboard), data: { sector: 'COCINA' } },
       { path: 'barra', canActivate: [roleGuard(['BARRA'])], loadComponent: () => import('./features/sector/sector-dashboard').then((m) => m.SectorDashboard), data: { sector: 'BARRA' } },
       { path: 'usuarios', canActivate: [roleGuard(['ADMIN'])], loadComponent: () => import('./features/usuarios/usuarios-page').then((m) => m.UsuariosPage) },
+      { path: 'mesas-admin', canActivate: [roleGuard(['ADMIN'])], loadComponent: () => import('./features/mesas-admin/mesas-admin-page').then((m) => m.MesasAdminPage) },
       { path: '', pathMatch: 'full', redirectTo: 'mozo' },
     ],
   },

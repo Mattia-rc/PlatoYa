@@ -9,6 +9,7 @@
       @if (role() === 'COCINA') { <a routerLink="/cocina" routerLinkActive="active">Cocina</a> }
       @if (role() === 'BARRA') { <a routerLink="/barra" routerLinkActive="active">Barra</a> }
       @if (role() === 'ADMIN') { <a routerLink="/usuarios" routerLinkActive="active">Usuarios</a> }
+      @if (role() === 'ADMIN') { <a routerLink="/mesas-admin" routerLinkActive="active">Administrar mesas</a> }
     </nav>
     <div class="session">
       <span><strong>{{ auth.currentUser()?.nombre }}</strong><small>{{ role() }}</small></span>

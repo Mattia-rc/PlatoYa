@@ -12,7 +12,11 @@ export interface MesaResumen {
   estado: EstadoMesa;
   cuentaId?: number;
   estadoCuenta?: 'ABIERTA' | 'CUENTA_PEDIDA' | 'PAGADA' | 'ANULADA';
+  fechaBaja?: string | null;
 }
+
+export interface MesaAdministracion { id: number; numero: number; capacidad: number; estado: EstadoMesa; fechaBaja: string | null; }
+export interface MesaRequest { numero: number; capacidad: number; }
 
 export interface KpiMesas {
   totalMesas: number;
