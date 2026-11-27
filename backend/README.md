@@ -98,6 +98,7 @@ Necesita Docker corriendo: `MigracionesTest`, `auth.AutenticacionTest` y `usuari
 | `MigracionesTest` | Migraciones y datos de prueba contra PostgreSQL 16. |
 | `auth.AutenticacionTest` | Login JWT sobre los usuarios de V2 (correcto, credenciales inválidas, usuario dado de baja, datos vacíos), vencimiento de 12 h, 401 por token ausente, vencido, de otra clave o mal formado, y 403 por rol. |
 | `usuarios.UsuariosTest` | ABM de usuarios: alta con login posterior, validaciones (formato del usuario, recorte, campos obligatorios, rol inexistente), usuario repetido, listado, modificación con y sin contraseña, baja lógica y reactivación (RN-23), auto-baja y cambio del propio rol, 404, 403 por rol y 401 sin token. |
+| `mesas.MesasTest` | ABM de mesas: alta, validaciones, número repetido, listado con filtro de bajas, modificación, baja lógica y reactivación (RN-23), bloqueo de baja para mesas ocupadas, consulta para MOZO, escrituras solo para ADMIN, 404, 403 y 401. |
 | `auth.JwtConfigTest` | `JWT_SECRET` ausente o de menos de 32 bytes. |
 | `common.GlobalExceptionHandlerTest` | Formato y códigos de error (400, 404, 409, 500), incluido el 400 con el detalle del campo cuando el body trae un valor con formato inválido, como un enum inexistente. |
 | `common.CorsConfigTest` | CORS: acepta el origen del front y rechaza otros. |

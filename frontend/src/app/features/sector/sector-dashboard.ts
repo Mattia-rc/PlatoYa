@@ -38,9 +38,12 @@ export class SectorDashboard {
   }
 
   private iniciarPolling(): void {
-    this.polling.poll(() => forkJoin({ items: this.api.obtenerItemsPorSector(this.sector), kpis: this.api.obtenerKpisPreparacion(this.sector) }), this.destroyRef).subscribe({
+    this.polling.poll(
+      () => forkJoin({ items: this.api.obtenerItemsPorSector(this.sector), kpis: this.api.obtenerKpisPreparacion(this.sector) }),
+      this.destroyRef,
+      () => { this.cargando.set(false); this.error.set(`No se pudo cargar la pantalla de ${this.sector.toLowerCase()}. Se reintentará automáticamente.`); },
+    ).subscribe({
       next: ({ items, kpis }) => { this.items.set(items); this.kpis.set(kpis); this.cargando.set(false); this.error.set(''); },
-      error: () => { this.cargando.set(false); this.error.set(`No se pudo cargar la pantalla de ${this.sector.toLowerCase()}.`); },
     });
   }
 }
