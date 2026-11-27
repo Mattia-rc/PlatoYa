@@ -20,8 +20,8 @@
       <label for="contrasena">Contraseña</label>
       <p-password inputId="contrasena" name="contrasena" [(ngModel)]="contrasena" [feedback]="false" [toggleMask]="true"
         autocomplete="current-password" placeholder="Tu contraseña" />
-      <p-button type="button" label="Ingresar" icon="pi pi-arrow-right" iconPos="right" [loading]="cargando()"
-        styleClass="submit-button" (onClick)="ingresar()" />
+      <p-button type="submit" label="Ingresar" icon="pi pi-arrow-right" iconPos="right" [loading]="cargando()"
+        styleClass="submit-button" />
       <div class="demo-users">
         <strong>Modo demostración</strong>
         <span>Usuarios: <code>admin</code>, <code>mozo</code>, <code>cocina</code> o <code>barra</code></span>
