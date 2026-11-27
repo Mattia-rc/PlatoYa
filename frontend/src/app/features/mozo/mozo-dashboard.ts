@@ -31,9 +31,12 @@ export class MozoDashboard {
   }
 
   private iniciarPolling(): void {
-    this.polling.poll(() => forkJoin({ mesas: this.api.obtenerMesas(), kpis: this.api.obtenerKpisMesas() }), this.destroyRef).subscribe({
+    this.polling.poll(
+      () => forkJoin({ mesas: this.api.obtenerMesas(), kpis: this.api.obtenerKpisMesas() }),
+      this.destroyRef,
+      () => { this.cargando.set(false); this.error.set('No se pudieron cargar las mesas. Se reintentará automáticamente.'); },
+    ).subscribe({
       next: ({ mesas, kpis }) => { this.mesas.set(mesas); this.kpis.set(kpis); this.cargando.set(false); this.error.set(''); },
-      error: () => { this.cargando.set(false); this.error.set('No se pudieron cargar las mesas. Se reintentará al actualizar la pantalla.'); },
     });
   }
 }
